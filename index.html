@@ -65,6 +65,8 @@ html{
   scroll-behavior:smooth;
   -webkit-text-size-adjust:100%;
   scroll-padding-top:80px;
+  /* Compensate for scrollbar so 100vw / 100% widths match the visible viewport */
+  scrollbar-gutter:stable both-edges;
 }
 body{
   font-family:var(--font-sans);
@@ -78,6 +80,8 @@ body{
   min-height:100vh;
   min-height:100dvh;
   padding-bottom:env(safe-area-inset-bottom);
+  /* lock horizontal centering to the visible viewport, not the layout viewport */
+  margin-left:auto;margin-right:auto;
 }
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
@@ -154,6 +158,8 @@ button{font-family:inherit}
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   overflow:hidden;z-index:10;
   padding:calc(6rem + var(--safe-top)) 1.25rem 4rem;
+  /* Use the same horizontal padding rhythm as .content so hero text and
+     below-the-fold content share the exact same center axis. */
 }
 .hero-bg{position:absolute;inset:0;z-index:0}
 .hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.32;filter:saturate(.7) brightness(.45) contrast(1.15) hue-rotate(-10deg)}
@@ -169,7 +175,13 @@ button{font-family:inherit}
     radial-gradient(circle at 50% 90%,rgba(167,139,250,.10),transparent 40%);
   mix-blend-mode:screen;
 }
-.hero-content{position:relative;z-index:3;text-align:center;max-width:var(--max);width:100%}
+/* Hero content shares the exact same max-width + centering axis as .content */
+.hero-content{
+  position:relative;z-index:3;text-align:center;
+  max-width:var(--max);width:100%;
+  margin-left:auto;margin-right:auto;
+  display:flex;flex-direction:column;align-items:center;
+}
 
 /* floating drones */
 .drone-field{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
@@ -248,27 +260,32 @@ button{font-family:inherit}
   font-size:clamp(.88rem,3vw,1.08rem);
   font-weight:500;letter-spacing:.01em;
   padding:.85rem 1.5rem;
+  border:1px solid rgba(255,140,66,.25);
   border-left:3px solid var(--accent-2);
-  display:inline-block;text-align:left;
-  background:linear-gradient(90deg,rgba(255,140,66,.14),transparent 70%);
-  border-radius:0 12px 12px 0;
+  display:inline-block;text-align:center;
+  background:linear-gradient(90deg,rgba(255,140,66,.14),rgba(255,140,66,.04) 70%);
+  border-radius:12px;
   color:var(--ink);
   line-height:1.7;
   max-width:100%;
 }
 .tagline strong{color:var(--accent-2);font-weight:600}
 
-.hero .cta-buttons{opacity:0;transform:translateY(20px);animation:fiu .7s 1.15s ease forwards}
+.hero .cta-buttons{opacity:0;transform:translateY(20px);animation:fiu .7s 1.15s ease forwards;justify-content:center}
 @keyframes fiu{to{opacity:1;transform:translateY(0)}}
 
-/* scroll hint */
+/* scroll hint — centered via left:50% + translateX(-50%).
+   IMPORTANT: do NOT animate `transform` on this element (e.g. via `fiu`),
+   because the animation's `forwards` fill would overwrite translateX(-50%)
+   and cause horizontal drift. Animate opacity only. */
 .scroll-hint{
   position:absolute;bottom:calc(1.5rem + var(--safe-bottom));left:50%;transform:translateX(-50%);
   z-index:3;display:flex;flex-direction:column;align-items:center;gap:.5rem;
   color:var(--muted);font-family:var(--font-mono);
   font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;
-  opacity:0;animation:fiu .6s 1.6s ease forwards;
+  opacity:0;animation:fiuFade .6s 1.6s ease forwards;
 }
+@keyframes fiuFade{to{opacity:1}}
 .scroll-line{width:1px;height:36px;background:linear-gradient(to bottom,var(--accent),transparent);position:relative;overflow:hidden}
 .scroll-line::after{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:var(--accent);animation:scrollDot 2s ease-in-out infinite}
 @keyframes scrollDot{0%{transform:translateY(-100%)}100%{transform:translateY(450%)}}
@@ -279,7 +296,14 @@ button{font-family:inherit}
 .content{position:relative;z-index:10;max-width:var(--max);margin:0 auto;padding:0 1.25rem}
 .section{padding:5rem 0;position:relative}
 
-.section-head{margin-bottom:3rem;position:relative}
+/* unified section header — centered, consistent across all sections */
+.section-head{
+  margin:0 auto 3rem;
+  position:relative;
+  text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+  max-width:680px;
+}
 .sec-label{
   font-family:var(--font-mono);
   font-size:clamp(.65rem,2.5vw,.72rem);
@@ -307,8 +331,14 @@ button{font-family:inherit}
   font-size:clamp(.88rem,3vw,1rem);
   color:var(--muted);
   max-width:600px;line-height:1.7;
+  margin-left:auto;margin-right:auto;
 }
-.divider{width:80px;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;margin-top:1.6rem;position:relative}
+.divider{
+  width:80px;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  border-radius:2px;margin-top:1.6rem;position:relative;
+  margin-left:auto;margin-right:auto;
+}
 .divider::after{content:'';position:absolute;right:-6px;top:-2px;width:7px;height:7px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 12px var(--glow-2)}
 
 /* =========================================================
@@ -405,9 +435,14 @@ button{font-family:inherit}
 .tech-chip:hover,.tech-chip:active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);box-shadow:0 0 20px rgba(0,212,255,.18);transform:translateY(-2px)}
 
 /* =========================================================
-   OVERVIEW CARDS
+   OVERVIEW CARDS — centered, text-aligned consistent
+   Grid columns are equal-width and cards fill 100% so the section's
+   horizontal center axis matches the section-head above it.
    ========================================================= */
-.ov-grid{display:grid;grid-template-columns:1fr;gap:1.1rem}
+.ov-grid{
+  display:grid;grid-template-columns:1fr;gap:1.1rem;
+  justify-items:stretch;
+}
 .ov-card{
   background:var(--bg-card);
   border:1px solid var(--rule);
@@ -418,7 +453,11 @@ button{font-family:inherit}
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   cursor:default;
   will-change:transform;
+  text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+  width:100%;
 }
+.ov-card .ov-icon{margin-left:auto;margin-right:auto}
 .ov-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,transparent,var(--accent),transparent);
@@ -447,13 +486,16 @@ button{font-family:inherit}
 .ov-icon.a{background:linear-gradient(135deg,rgba(255,140,66,.18),rgba(255,140,66,.04));color:var(--accent-2);box-shadow:0 6px 20px rgba(255,140,66,.12),inset 0 0 12px rgba(255,140,66,.06)}
 .ov-icon.b{background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(167,139,250,.04));color:var(--accent-3);box-shadow:0 6px 20px rgba(167,139,250,.12),inset 0 0 12px rgba(167,139,250,.06)}
 .ov-card:hover .ov-icon,.ov-card:active .ov-icon{transform:scale(1.08) rotate(-4deg)}
-.ov-card h3{font-family:var(--font-display);font-size:clamp(1rem,3.5vw,1.1rem);font-weight:600;color:#fff;margin-bottom:.55rem;letter-spacing:-.01em}
-.ov-card p{font-size:clamp(.82rem,3vw,.88rem);color:var(--muted);line-height:1.75}
+.ov-card h3{font-family:var(--font-display);font-size:clamp(1rem,3.5vw,1.1rem);font-weight:600;color:#fff;margin-bottom:.55rem;letter-spacing:-.01em;text-align:center}
+.ov-card p{font-size:clamp(.82rem,3vw,.88rem);color:var(--muted);line-height:1.75;text-align:center}
 
 /* =========================================================
-   POSITIONS
+   POSITIONS — centered cards with aligned content
    ========================================================= */
-.pos-grid{display:grid;grid-template-columns:1fr;gap:.9rem}
+.pos-grid{
+  display:grid;grid-template-columns:1fr;gap:.9rem;
+  justify-items:stretch;
+}
 .pos-card{
   background:var(--bg-card);
   border:1px solid var(--rule);
@@ -463,6 +505,7 @@ button{font-family:inherit}
   position:relative;overflow:hidden;
   transition:transform .4s var(--ease-out),border-color .4s,box-shadow .4s;
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  width:100%;
 }
 .pos-card::before{
   content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
@@ -505,10 +548,11 @@ button{font-family:inherit}
 .skill.o:hover,.skill.o:active{background:rgba(255,140,66,.22);border-color:rgba(255,140,66,.4)}
 
 /* =========================================================
-   BENEFITS
+   BENEFITS — centered, already center-aligned, ensure grid center
    ========================================================= */
-.ben-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem}
+.ben-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;justify-items:stretch}
 .ben-card{
+  width:100%;
   text-align:center;
   padding:1.7rem 1rem 1.5rem;
   border-radius:var(--radius-lg);
@@ -556,30 +600,59 @@ button{font-family:inherit}
 .ben-card p{font-size:clamp(.72rem,2.5vw,.8rem);color:var(--muted);line-height:1.65}
 
 /* =========================================================
-   PROCESS / TIMELINE
+   PROCESS / TIMELINE — centered container, dot & line perfectly aligned
+   Layout: vertical line runs down the left axis; each step has a dot
+   whose center sits exactly on the line. Coordinates are computed so
+   that dot-center === line-center at every breakpoint.
    ========================================================= */
-.process{display:flex;flex-direction:column;gap:0;position:relative;padding-left:2.5rem;margin-top:1rem}
-.process::before{content:'';position:absolute;left:11px;top:14px;bottom:14px;width:2px;background:linear-gradient(to bottom,var(--accent),var(--accent-2),var(--accent-3),transparent);opacity:.35}
+.process{
+  display:flex;flex-direction:column;gap:0;
+  position:relative;
+  padding-left:2.5rem;            /* step content starts 40px from left edge */
+  margin-top:1rem;
+  max-width:680px;
+  margin-left:auto;margin-right:auto;
+}
+/* the track line — centered on x=6px (so dot at x=6px sits on it) */
+.process::before{
+  content:'';position:absolute;
+  left:5px;top:14px;bottom:14px;
+  width:2px;
+  background:linear-gradient(to bottom,var(--accent),var(--accent-2),var(--accent-3),transparent);
+  opacity:.35;
+}
+/* the progress fill line — same x as the track */
 .process::after{
-  content:'';position:absolute;left:11px;top:14px;width:2px;height:var(--progress,0%);
+  content:'';position:absolute;
+  left:5px;top:14px;
+  width:2px;height:var(--progress,0%);
   background:linear-gradient(to bottom,var(--accent),var(--accent-2),var(--accent-3));
   box-shadow:0 0 10px var(--glow);
   transition:height .15s;
 }
+/* each step — dot center sits exactly on the line at x=6px (relative to .process).
+   Dot width = 14px, so dot-left-edge needs to be at x = 6 - 7 = -1px (relative to .process).
+   Step content starts at padding-left = 2.5rem (mobile default).
+   So dot `left` = -1px - 2.5rem (uses rem so it scales with html font-size on small phones). */
 .step{position:relative;padding:1.2rem 0 1.2rem 1.4rem}
 .step::before{
-  content:'';position:absolute;left:-2.5rem;top:1.5rem;
+  content:'';position:absolute;
+  left:calc(-1px - 2.5rem);top:1.5rem;
   width:14px;height:14px;border-radius:50%;
   border:2px solid var(--accent);
   background:var(--bg);
   z-index:1;
+  box-sizing:border-box;
   transition:all .4s var(--ease-out);
 }
+/* dot fill — same position as ring */
 .step::after{
-  content:'';position:absolute;left:-2.5rem;top:1.5rem;
+  content:'';position:absolute;
+  left:calc(-1px - 2.5rem);top:1.5rem;
   width:14px;height:14px;border-radius:50%;
   background:var(--accent);
   z-index:1;opacity:0;transform:scale(.5);
+  box-sizing:border-box;
   transition:all .4s var(--ease-out);
 }
 .step:hover::before,.step:active::before{box-shadow:0 0 0 4px rgba(0,212,255,.18)}
@@ -832,7 +905,7 @@ footer::before{
   .ov-card{padding:2rem 1.8rem}
   .ov-icon{width:54px;height:54px}
   .ov-icon img{width:30px;height:30px}
-  .pos-grid{grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.1rem}
+  .pos-grid{grid-template-columns:repeat(2,1fr);gap:1.1rem;max-width:880px;margin-left:auto;margin-right:auto}
   .pos-card{padding:1.6rem 1.7rem}
   .ben-grid{grid-template-columns:repeat(3,1fr);gap:1.1rem}
   .ben-card{padding:2.2rem 1.2rem 1.8rem}
@@ -841,7 +914,8 @@ footer::before{
   .stat-item{padding:2.2rem 1rem 1.8rem}
   .process{padding-left:3rem}
   .step{padding:1.4rem 0 1.4rem 1.8rem}
-  .step::before,.step::after{left:-3rem;top:1.6rem}
+  /* desktop: padding-left 3rem → dot left = -1px - 3rem */
+  .step::before,.step::after{left:calc(-1px - 3rem);top:1.6rem}
   .cta-wrap{padding:5rem 1.5rem 4rem}
   .cta{padding:4.5rem 2rem}
   .contact-row{gap:1.5rem;margin-top:2.8rem}
@@ -1060,7 +1134,7 @@ footer {
   <div class="hero-content">
     <div class="badge"><span class="badge-dot"></span>Challenge Cup 2026 · 招募开启</div>
     <h1>无人机集群团队<br><span class="accent-line">期待你的加入</span></h1>
-    <p class="subtitle">挑战杯参赛项目 · 一起做点有趣的事</p>
+    <p class="subtitle">挑战杯参赛项目 · 物理AI × 数字孪生 × 无人机集群</p>
     <div class="tagline-wrap">
       <div class="tagline">
         <strong>零基础也能参与</strong> · 带你从入门到实战<br>用代码和电路，让无人机&ldquo;组团上天&rdquo;
@@ -1078,7 +1152,7 @@ footer {
 
   <!-- ===================== STATS ===================== -->
   <div class="stats-bar rv">
-    <div class="stat-item"><div class="stat-num" data-target="8">0<span class="plus">+</span></div><div class="stat-desc">开放岗位</div></div>
+    <div class="stat-item"><div class="stat-num" data-target="2">0<span class="plus"></span></div><div class="stat-desc">开放岗位</div></div>
     <div class="stat-item"><div class="stat-num" data-target="0" data-text="零">零<span class="plus"></span></div><div class="stat-desc">基础要求</div></div>
     <div class="stat-item"><div class="stat-num" data-target="1" data-suffix="对1">0<span class="plus">对1</span></div><div class="stat-desc">学长学姐带教</div></div>
     <div class="stat-item"><div class="stat-num" data-target="100" data-suffix="%">0<span class="plus">%</span></div><div class="stat-desc">从零学起也没问题</div></div>
@@ -1099,7 +1173,7 @@ footer {
     <div class="section-head">
       <div class="sec-label rv">Project · 项目愿景</div>
       <h2 class="sec-title rv">我们要做什么</h2>
-      <p class="sec-sub rv">简单来说：让一群无人机自己组网、自己配合，完成协同任务。这是一个把&ldquo;科幻片里的画面&rdquo;变成现实的过程。</p>
+      <p class="sec-sub rv">项目研究方向：<strong>基于物理AI与数字孪生无人机群的时钟同步与自组网技术研究</strong>。简单来说，就是让一群无人机在数字孪生环境中实现精准时钟同步与自组网协同，再把训练好的策略迁移到真机上完成实战任务。</p>
       <div class="divider rv"></div>
     </div>
     <div class="ov-grid">
@@ -1112,8 +1186,8 @@ footer {
 
       <div class="ov-card rv d2 tilt">
         <div class="ov-icon a"><img src="images/project-img2.jpg" alt="Comm icon" loading="lazy"></div>
-        <h3>无人机之间自己&ldquo;说话&rdquo;</h3>
-        <p>不需要地面指挥，无人机之间通过自组网自动通信、交换信息。就像群鸟飞行，不用喊口令也能保持队形。</p>
+        <h3>时钟同步与自组网</h3>
+        <p>无人机之间先做精准时钟同步，再通过自组网自动通信、交换信息。就像群鸟飞行，不用喊口令也能保持队形。</p>
       </div>
 
       <div class="ov-card rv d3 tilt">
@@ -1146,51 +1220,15 @@ footer {
     <div class="pos-grid">
 
       <div class="pos-card rv d1"><span class="pos-num">01</span><div>
-        <h3>算法 / AI 方向</h3>
-        <p class="pos-desc">训练无人机做简单的决策，比如避障、跟随。会用 Python 就行。</p>
-        <div class="pos-skills"><span class="skill">Python</span><span class="skill">PyTorch（加分）</span><span class="skill o">有兴趣就能来</span></div>
+        <h3>答辩与展示方向</h3>
+        <p class="pos-desc">统筹路演答辩、视觉美工、资料整理与 PPT 优化三块工作，共 3 个名额。负责现场答辩、视觉设计、材料打磨，是项目对外呈现的核心力量。</p>
+        <div class="pos-skills"><span class="skill">路演答辩 ×1</span><span class="skill">美工设计 ×1</span><span class="skill o">资料与 PPT 优化 ×1</span></div>
       </div></div>
 
       <div class="pos-card rv d2"><span class="pos-num">02</span><div>
-        <h3>通信 / 网络方向</h3>
-        <p class="pos-desc">让无人机之间能互相通信。了解网络基础概念就很棒了。</p>
-        <div class="pos-skills"><span class="skill">计算机网络基础</span><span class="skill">C / C++（加分）</span><span class="skill o">在学也没关系</span></div>
-      </div></div>
-
-      <div class="pos-card rv d3"><span class="pos-num">03</span><div>
-        <h3>仿真 / 测试方向</h3>
-        <p class="pos-desc">搭建仿真环境、跑测试。这其实是个很好的入门切入点！</p>
-        <div class="pos-skills"><span class="skill">Python</span><span class="skill">Linux 基本操作</span><span class="skill o">零基础友好</span></div>
-      </div></div>
-
-      <div class="pos-card rv d4"><span class="pos-num">04</span><div>
-        <h3>嵌入式 / 飞控方向</h3>
-        <p class="pos-desc">跟硬件打交道，把代码烧到无人机上。喜欢动手的同学看这里。</p>
-        <div class="pos-skills"><span class="skill">C / C++</span><span class="skill">单片机经验（加分）</span><span class="skill o">会焊接更好</span></div>
-      </div></div>
-
-      <div class="pos-card rv d1"><span class="pos-num">05</span><div>
-        <h3>感知 / 图像方向</h3>
-        <p class="pos-desc">帮无人机&ldquo;看&rdquo;东西，识别障碍物、追踪目标。</p>
-        <div class="pos-skills"><span class="skill">OpenCV</span><span class="skill">Python</span><span class="skill o">学过图像处理即可</span></div>
-      </div></div>
-
-      <div class="pos-card rv d2"><span class="pos-num">06</span><div>
-        <h3>前端 / 后端开发</h3>
-        <p class="pos-desc">做一个控制面板或可视化界面，能看懂数据就行。</p>
-        <div class="pos-skills"><span class="skill">HTML / CSS / JS</span><span class="skill">React / Vue（加分）</span><span class="skill o">做过网页就行</span></div>
-      </div></div>
-
-      <div class="pos-card rv d3"><span class="pos-num">07</span><div>
-        <h3>硬件 / 结构方向</h3>
-        <p class="pos-desc">设计无人机的外壳、选传感器、画电路板。动手达人首选。</p>
-        <div class="pos-skills"><span class="skill">SolidWorks</span><span class="skill">PCB 基础（加分）</span><span class="skill o">喜欢动手就行</span></div>
-      </div></div>
-
-      <div class="pos-card rv d4"><span class="pos-num">08</span><div>
-        <h3>项目管理 / 文档方向</h3>
-        <p class="pos-desc">整理资料、写文档、协调进度。细心靠谱最重要。</p>
-        <div class="pos-skills"><span class="skill">Office / LaTeX</span><span class="skill">数据整理</span><span class="skill o">认真负责就行</span></div>
+        <h3>技术开发与算法优化</h3>
+        <p class="pos-desc">负责项目核心算法与系统开发，包括物理 AI 建模、数字孪生仿真、时钟同步与自组网算法的实现与优化。会用 Python 就能上手。</p>
+        <div class="pos-skills"><span class="skill">Python / C++</span><span class="skill">PyTorch / ROS（加分）</span><span class="skill o">有兴趣就能来</span></div>
       </div></div>
 
     </div>
@@ -1258,7 +1296,7 @@ footer {
       <div class="step">
         <span class="step-num">Step 01</span>
         <h3>聊聊看</h3>
-        <p>先加微信 / 发邮件简单聊聊你的兴趣和方向，不设任何门槛。我们更看重热情和靠谱。</p>
+        <p>先发邮件或扫码进群简单聊聊你的兴趣和方向，不设任何门槛。我们更看重热情和靠谱。</p>
       </div>
       <div class="step">
         <span class="step-num">Step 02</span>
@@ -1288,20 +1326,16 @@ footer {
     <h2 class="rv">感兴趣就来聊聊吧</h2>
     <p class="rv">不管你是什么专业、什么年级，只要对无人机和技术感兴趣，都欢迎来了解一下。不报名也没关系，交个朋友也行！</p>
     <div class="cta-btns rv">
-      <a href="#" class="btn btn-p magnetic">加微信聊聊</a>
-      <a href="#" class="btn btn-s magnetic">发邮件也行</a>
+      <a href="mailto:2938911837@qq.com" class="btn btn-p magnetic">发邮件聊聊</a>
+      <a href="#qrcode-anchor" class="btn btn-s magnetic">扫码进群</a>
     </div>
     <div class="contact-row rv">
-      <div class="contact-item">
-        <span class="contact-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
-        <span>微信：peican0516777</span>
-      </div>
       <div class="contact-item">
         <span class="contact-icon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
         <span>邮箱：2938911837@qq.com</span>
       </div>
     </div>
-    <div class="qrcode-wrap rv">
+    <div class="qrcode-wrap rv" id="qrcode-anchor">
       <p>&#128241; 扫码加入群聊，一起交流</p>
       <img class="qrcode-img" src="images/qrcode.png" alt="QQ群二维码" loading="lazy">
       </div>
